@@ -1,27 +1,27 @@
-{ config, pkgs, lib, ... }:
 
+i{ config, pkgs, lib, ... }:
 {
-  # Username and home directory
+  # Only specify username (let HM auto-detect homeDirectory)
   home.username = "dhuynh";
-  home.homeDirectory = "/home/dhuynh";
-
-  # Required: Home Manager state version (match your NixOS version)
+  
+  # Required version lock
   home.stateVersion = "24.05";
 
-  # Enable zsh shell
-  programs.zsh.enable = true;
+  # Shell configuration
+  programs.zsh = {
+    enable = true;
+    # Add your zsh config here instead of via dotfiles if possible
+    initExtra = builtins.readFile ./dotfiles/.zshrc;
+  };
 
-  # Link your dotfiles from your repo
+  # Dotfile management (simplified)
   home.file = {
-    ".zshrc".source = ./dotfiles/.zshrc;
     ".p10k.zsh".source = ./dotfiles/.p10k.zsh;
     ".gitconfig".source = ./dotfiles/.gitconfig;
   };
 
-  # Add powerlevel10k package for the user
+  # User packages
   home.packages = with pkgs; [
+    # List your user packages here
   ];
-
-  # Remove the invalid 'promptInit' attribute completely
 }
-
