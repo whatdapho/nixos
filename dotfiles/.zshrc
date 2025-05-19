@@ -145,6 +145,8 @@ alias vi='nvim'                    # Use Neovim instead of Vim
 alias c='clear'                    # Clear terminal
 alias history='history -50'	   # Show the last 50 commands in history
 
+# Personal ALIASES
+alias rebuildnix='sudo nixos-rebuild switch -I nixos-config=/home/dhuynh/GitHub/nixos-config/configuration.nix'
 alias sshdc='ssh -L 5936:cvg:5936 dannyh@nxtnet.nextsemi.com'
 alias sshoffice='ssh -L 5936:lab236:5936 dannyh@office.nextsemi.com'
 
