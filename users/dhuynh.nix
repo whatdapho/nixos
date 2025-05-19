@@ -1,27 +1,36 @@
-
 { config, pkgs, lib, ... }:
+
 {
-  # Only specify username (let HM auto-detect homeDirectory)
+  # Basic user configuration
   home.username = "dhuynh";
-  
-  # Required version lock
+  home.homeDirectory = "/home/dhuynh";
   home.stateVersion = "24.05";
 
   # Shell configuration
   programs.zsh = {
     enable = true;
-    # Add your zsh config here instead of via dotfiles if possible
-    initExtra = builtins.readFile ./dotfiles/.zshrc;
+    # Basic zsh config that will work even without dotfiles
+    initExtra = ''
+      HISTFILE=~/.zsh_history
+      HISTSIZE=10000
+      SAVEHIST=10000
+      setopt appendhistory
+    '';
   };
 
-  # Dotfile management (simplified)
-  home.file = {
-    ".p10k.zsh".source = ./dotfiles/.p10k.zsh;
-    ".gitconfig".source = ./dotfiles/.gitconfig;
+  # Dotfiles management (only if files exist)
+  home.file = let
+    dotfilesDir = ./dotfiles;
+  in lib.optionalAttrs (builtins.pathExists dotfilesDir) {
+    ".zshrc".source = "${dotfilesDir}/.zshrc";
+    ".p10k.zsh".source = "${dotfilesDir}/.p10k.zsh";
+    ".gitconfig".source = "${dotfilesDir}/.gitconfig";
   };
 
-  # User packages
+  # Packages
   home.packages = with pkgs; [
-    # List your user packages here
+    # Add your user packages here
+    htop
+    neovim
   ];
 }

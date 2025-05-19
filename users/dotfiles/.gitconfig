@@ -1,0 +1,5 @@
+[safe]
+	directory = /etc/nixos
+[user]
+	email = danny@nextsemi.com
+	name = Danny Huynh

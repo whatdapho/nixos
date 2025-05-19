@@ -77,6 +77,7 @@
   environment.systemPackages = with pkgs; [ 
     home-manager
     glibcLocales  # For complete locale support
+    fzf
   ];
 
   home-manager = {
