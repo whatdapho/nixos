@@ -69,6 +69,7 @@ in
     wget curl git neovim zsh firefox htop neofetch btop unzip file killall
     fzf
     zsh-powerlevel10k
+    tree
   ];
 
   # User setup
