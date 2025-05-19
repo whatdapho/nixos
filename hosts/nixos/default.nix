@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -6,27 +6,82 @@
     ../../modules/core.nix
   ];
 
-  # REQUIRED: Must exactly match your hostname
+  # System identification
   networking.hostName = "nixos";
-
-  # REQUIRED: Must match your running OS version
   system.stateVersion = "24.05";
 
-  # Enable flakes permanently
-  nix.settings = {
-    experimental-features = ["nix-command" "flakes"];
-    # Optional but recommended for better performance
-    auto-optimise-store = true;
+  # Locale settings (fixes the perl warnings)
+  i18n = {
+    defaultLocale = "en_CA.UTF-8";
+    supportedLocales = ["en_CA.UTF-8/UTF-8" "en_US.UTF-8/UTF-8"];
+    extraLocaleSettings = {
+      LC_ADDRESS = "en_CA.UTF-8";
+      LC_IDENTIFICATION = "en_CA.UTF-8";
+      LC_MEASUREMENT = "en_CA.UTF-8";
+      LC_MONETARY = "en_CA.UTF-8";
+      LC_NAME = "en_CA.UTF-8";
+      LC_NUMERIC = "en_CA.UTF-8";
+      LC_PAPER = "en_CA.UTF-8";
+      LC_TELEPHONE = "en_CA.UTF-8";
+      LC_TIME = "en_CA.UTF-8";
+    };
   };
 
-  # Host-specific customizations
-  boot.loader.systemd-boot.enable = true;
+  console = {
+    font = "Lat2-Terminus16";
+    keyMap = "us";
+  };
+
+  time.timeZone = "America/Toronto";
+
+  # Nix configuration
+  nix = {
+    settings = {
+      experimental-features = ["nix-command" "flakes"];
+      auto-optimise-store = true;
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+  };
+
+  # Boot configuration for BIOS/MBR systems
+  boot.loader = {
+    grub = {
+      enable = true;
+      device = "/dev/sda";  # Your main disk
+      useOSProber = true;   # If dual-booting
+    };
+    # Explicitly disable EFI bootloaders
+    systemd-boot.enable = false;
+    efi.canTouchEfiVariables = lib.mkForce false;
+  };
+
+  # Services
   services.openssh.enable = true;
 
-  # Optional: Enable garbage collection
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
+  # User configuration
+  users.users.dhuynh = {
+    isNormalUser = true;
+    group = "dhuynh";
+    extraGroups = ["wheel"];
+    home = "/home/dhuynh";
+    shell = pkgs.zsh;
+  };
+
+  users.groups.dhuynh = {};
+
+  # Home Manager
+  environment.systemPackages = with pkgs; [ 
+    home-manager
+    glibcLocales  # For complete locale support
+  ];
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    users.dhuynh = import ../../users/dhuynh.nix;
   };
 }
