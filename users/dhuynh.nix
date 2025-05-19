@@ -1,5 +1,5 @@
 
-i{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 {
   # Only specify username (let HM auto-detect homeDirectory)
   home.username = "dhuynh";

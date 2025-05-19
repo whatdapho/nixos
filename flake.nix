@@ -1,19 +1,20 @@
 {
-  description = "My NixOS configurations";
+  description = "My NixOS and Home Manager configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
-    flake-utils.url = "github:numtide/flake-utils";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-hardware, flake-utils, ... }@inputs:
-    let
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+    # NixOS configurations
+    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
-      
-      commonModules = [
+      modules = [
+        ./hosts/nixos/default.nix
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -21,23 +22,12 @@
           home-manager.users.dhuynh = import ./users/dhuynh.nix;
         }
       ];
-    in {
-      nixosConfigurations = {
-        nixos = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = commonModules ++ [
-            ./hosts/nixos/default.nix
-            nixos-hardware.nixosModules.common-cpu-intel
-          ];
-        };
-      };
-
-      # Fixed devShells section
-      devShells.${system}.default = pkgs.mkShell {
-        packages = with pkgs; [
-          alejandra
-          statix
-        ];
-      };
     };
+
+    # Home Manager configurations
+    homeConfigurations."dhuynh@nixos" = home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      modules = [ ./users/dhuynh.nix ];
+    };
+  };
 }
