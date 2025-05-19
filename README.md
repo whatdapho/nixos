@@ -69,8 +69,16 @@ To deploy this configuration to a brand new NixOS machine:
 
 ---
 
-## Important Considerations
+## Home Manager Integration (Added May 19, 2025)
 
-* **Secrets Management**: **NEVER** commit sensitive information (like passwords, private API keys, or personal private data) directly into a public Git repository. For managing secrets in NixOS, consider using dedicated tools like `agenix` or `sops-nix`, which provide secure, encrypted solutions.
-* **Hardware Configuration**: Remember that `hardware-configuration.nix` is inherently machine-specific. You might need to generate a new `hardware-configuration.nix` for each different machine you deploy to (`nixos-generate-config --root /mnt`) or adapt an existing one.
-* **Organization**: As your `default.nix` grows, consider breaking it down into smaller, more manageable modular files (e.g., `modules/`, `users/`, `programs/`) and importing them. This improves readability and maintainability.
+Home Manager is used to declaratively manage user-specific configurations and packages alongside the system configuration. This setup allows:
+
+* Seamless management of user dotfiles, shell configurations, and user programs.
+* Keeping user environment consistent across machines by storing all configuration in the Git repository.
+* Defining user packages and settings in `home.nix` which Home Manager applies automatically.
+
+To build and apply your Home Manager configuration:
+
+```bash
+home-manager switch --flake .#dhuynh
+
