@@ -4,75 +4,97 @@ let
   # Import Home Manager from the official release tarball
   home-manager = import (builtins.fetchTarball {
     url = "https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz";
-  }) {
-    pkgs = pkgs;
-  };
+  }) { inherit pkgs; };
 in
 
 {
-  # Import NixOS and Home Manager modules
-  imports = [
-    ./hardware-configuration.nix
-    home-manager.nixos
+  # ========== SYSTEM PACKAGES ==========
+  environment.systemPackages = with pkgs; [
+    # ----- Core Utilities -----
+    wget       # CLI download utility
+    curl       # Powerful HTTP client
+    git        # Version control system
+    neovim     # Modern Vim fork
+    zsh        # Z shell interpreter
+    firefox    # Web browser
+    htop       # Interactive process viewer
+    neofetch   # System information tool
+    btop       # Resource monitor (better htop)
+    unzip      # Archive extraction utility
+    file       # File type identification
+    killall    # Process killing utility
+
+    # ----- Fuzzy Finding -----
+    fzf        # Fuzzy finder for CLI
+    fd         # Fast alternative to find
+
+    # ----- Filesystem Tools -----
+    tree       # Directory listing in tree format
+    ripgrep    # Fast grep alternative
+
+    # ----- Development -----
+    home-manager  # User environment manager
+    glibcLocales  # Locale support for development
+
+    # ----- GNOME Applications -----
+    gnome.gnome-tweaks    # GNOME customization tool
+    gnome.gnome-terminal  # GNOME terminal emulator
+    gnome.nautilus        # GNOME file manager
+    gnome.gnome-keyring   # Password management system
+
+    # ----- Shell Enhancements -----
+    zsh-powerlevel10k  # Zsh theme framework
+    bat                # Cat clone with syntax highlighting
   ];
 
+  # ========== SYSTEM CONFIGURATION ==========
   # Host and locale settings
   networking.hostName = "nixos";
   time.timeZone = "America/Toronto";
   i18n.defaultLocale = "en_CA.UTF-8";
 
+  # Console settings
   console = {
     font = "Lat2-Terminus16";
     keyMap = lib.mkForce "us";
     useXkbConfig = true;
   };
 
-  # Bootloader
-  boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
+  # ========== BOOT CONFIGURATION ==========
+  boot.loader.grub = {
+    enable = true;
+    device = "/dev/sda";
+  };
 
-  # Kernel and boot
+  # Kernel settings
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10;
-    "kernel.sysrq" = 1;
+    "vm.swappiness" = 10;  # Reduce swap usage
+    "kernel.sysrq" = 1;    # Enable magic SysRq keys
   };
   boot.tmp.cleanOnBoot = true;
 
-  # Networking and firewall
-  networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  # ========== NETWORKING ==========
+  networking.networkmanager.enable = true;  # Network management
+  networking.firewall.allowedTCPPorts = [ 22 ];  # SSH
 
-  # SSH
-  services.openssh.enable = true;
+  # ========== SERVICES ==========
+  services.openssh.enable = true;  # Enable SSH server
 
   # GNOME Desktop
-  services.xserver.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
+  services.xserver = {
+    enable = true;
+    desktopManager.gnome.enable = true;
+    displayManager.gdm.enable = true;
+  };
 
   # Fonts
   fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk
-    noto-fonts-emoji
+    noto-fonts        # Google's font family
+    noto-fonts-cjk    # Asian language support
+    noto-fonts-emoji  # Color emoji support
   ];
 
-  # System packages (merged)
-  environment.systemPackages = with pkgs; [
-    # GNOME apps
-    gnome.gnome-tweaks
-    gnome.gnome-terminal
-    gnome.nautilus
-    gnome.gnome-keyring
-
-    # CLI tools
-    wget curl git neovim zsh firefox htop neofetch btop unzip file killall
-    fzf
-    zsh-powerlevel10k
-    tree
-  ];
-
-  # User setup
+  # ========== USER CONFIGURATION ==========
   users.users.dhuynh = {
     isNormalUser = true;
     description = "Danny Huynh";
@@ -81,10 +103,10 @@ in
   };
   users.defaultUserShell = pkgs.zsh;
 
-  # Printing
-  services.printing.enable = true;
+  # ========== SYSTEM SERVICES ==========
+  services.printing.enable = true;  # CUPS printing support
 
-  # Sound
+  # Sound configuration
   sound.enable = true;
   hardware.pulseaudio.enable = false;
   services.pipewire = {
@@ -93,26 +115,24 @@ in
     pulse.enable = true;
   };
 
-  # Docker
-  virtualisation.docker.enable = true;
+  # ========== VIRTUALIZATION ==========
+  virtualisation.docker.enable = true;  # Docker container support
 
-  # Shell config
-  programs.zsh.enable = true;
+  # ========== SHELL CONFIGURATION ==========
+  programs.zsh.enable = true;  # Enable Zsh system-wide
 
-  # GPG Agent
+  # ========== SECURITY ==========
   programs.gnupg.agent = {
     enable = true;
-    enableSSHSupport = true;
+    enableSSHSupport = true;  # Use GPG for SSH authentication
   };
 
-  # Sudo config
-  security.sudo.wheelNeedsPassword = false;
+  security.sudo.wheelNeedsPassword = false;  # Passwordless sudo for wheel group
 
-  # Home Manager user config
+  # ========== HOME MANAGER ==========
   home-manager.users.dhuynh = import ./home.nix;
   home-manager.backupFileExtension = "backup";
 
-  # NixOS version
+  # System version (don't change this)
   system.stateVersion = "24.05";
 }
-

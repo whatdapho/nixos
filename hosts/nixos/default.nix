@@ -1,16 +1,17 @@
 { config, pkgs, lib, ... }:
 
 {
+  # ========== IMPORTS ==========
   imports = [
-    ./hardware-configuration.nix
-    ../../modules/core.nix
+    ./hardware-configuration.nix  # Hardware-specific settings
+    ../../modules/core.nix        # Additional custom modules
   ];
 
-  # System identification
-  networking.hostName = "nixos";
-  system.stateVersion = "24.05";
+  # ========== SYSTEM IDENTITY ==========
+  networking.hostName = "nixos";  # Hostname for this machine
+  system.stateVersion = "24.05";  # Don't change this
 
-  # Locale settings (fixes the perl warnings)
+  # ========== LOCALE SETTINGS ==========
   i18n = {
     defaultLocale = "en_CA.UTF-8";
     supportedLocales = ["en_CA.UTF-8/UTF-8" "en_US.UTF-8/UTF-8"];
@@ -28,61 +29,51 @@
   };
 
   console = {
-    font = "Lat2-Terminus16";
-    keyMap = "us";
+    font = "Lat2-Terminus16";  # Console font
+    keyMap = "us";             # Keyboard layout
   };
 
-  time.timeZone = "America/Toronto";
+  time.timeZone = "America/Toronto";  # System timezone
 
-  # Nix configuration
+  # ========== NIX CONFIGURATION ==========
   nix = {
     settings = {
-      experimental-features = ["nix-command" "flakes"];
-      auto-optimise-store = true;
+      experimental-features = ["nix-command" "flakes"];  # Enable new Nix features
+      auto-optimise-store = true;  # Automatically optimize storage
     };
     gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
+      automatic = true;    # Automatic garbage collection
+      dates = "weekly";    # Run weekly
+      options = "--delete-older-than 7d";  # Keep 7 days of generations
     };
   };
 
-  # Boot configuration for BIOS/MBR systems
+  # ========== BOOTLOADER ==========
   boot.loader = {
     grub = {
       enable = true;
-      device = "/dev/sda";  # Your main disk
-      useOSProber = true;   # If dual-booting
+      device = "/dev/sda";   # Disk to install GRUB
+      useOSProber = true;    # Detect other OSes for dual-boot
     };
-    # Explicitly disable EFI bootloaders
-    systemd-boot.enable = false;
-    efi.canTouchEfiVariables = lib.mkForce false;
+    systemd-boot.enable = false;  # Disable UEFI bootloader
+    efi.canTouchEfiVariables = lib.mkForce false;  # Disable EFI
   };
 
-  # Services
-  services.openssh.enable = true;
-
-  # User configuration
+  # ========== USER CONFIGURATION ==========
   users.users.dhuynh = {
     isNormalUser = true;
     group = "dhuynh";
-    extraGroups = ["wheel"];
+    extraGroups = ["wheel"];  # Grant sudo access
     home = "/home/dhuynh";
     shell = pkgs.zsh;
   };
 
   users.groups.dhuynh = {};
 
-  # Home Manager
-  environment.systemPackages = with pkgs; [ 
-    home-manager
-    glibcLocales  # For complete locale support
-    fzf
-  ];
-
+  # ========== HOME MANAGER ==========
   home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.dhuynh = import ../../users/dhuynh.nix;
+    useGlobalPkgs = true;     # Use system packages
+    useUserPackages = true;   # Allow user-specific packages
+    users.dhuynh = import ../../users/dhuynh.nix;  # User config
   };
 }
