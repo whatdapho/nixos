@@ -43,12 +43,16 @@
 
   time.timeZone = "America/Toronto";
 
-  # Console settings
-  console = {
-    font = "Lat2-Terminus16";
-    keyMap = "us";
-    useXkbConfig = true;
-  };
+  # Console settings (using mkForce to override defaults)
+  console = lib.mkMerge [
+    {
+      font = "Lat2-Terminus16";
+      useXkbConfig = true;
+    }
+    (lib.mkForce {
+      keyMap = "us";
+    })
+  ];
 
   # ========== NETWORKING ==========
   networking.networkmanager.enable = true;
@@ -57,13 +61,15 @@
   # ========== SERVICES ==========
   services.openssh.enable = true;
 
-  # GNOME Desktop
+  # GNOME Desktop with updated XKB configuration
   services.xserver = {
     enable = true;
     desktopManager.gnome.enable = true;
     displayManager.gdm.enable = true;
-    layout = "us";
-    xkbVariant = "";
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
   };
 
   # Fonts
