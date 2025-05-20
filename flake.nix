@@ -10,21 +10,24 @@
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-    # NixOS configurations
     nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
+        ./hosts/nixos/hardware-configuration.nix
+        ./common/base.nix
         ./hosts/nixos/default.nix
         home-manager.nixosModules.home-manager
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.dhuynh = import ./users/dhuynh.nix;
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.dhuynh = import ./users/dhuynh.nix;
+            backupFileExtension = "backup";
+          };
         }
       ];
     };
 
-    # Home Manager configurations
     homeConfigurations."dhuynh@nixos" = home-manager.lib.homeManagerConfiguration {
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       modules = [ ./users/dhuynh.nix ];
