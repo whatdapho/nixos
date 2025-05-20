@@ -14,7 +14,7 @@
       system = "x86_64-linux";
       modules = [
         ./hosts/nixos/hardware-configuration.nix
-        ./common/base.nix
+        ./hosts/common/base.nix  # Corrected path
         ./hosts/nixos/default.nix
         home-manager.nixosModules.home-manager
         {
